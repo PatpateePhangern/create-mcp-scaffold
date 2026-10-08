@@ -1,5 +1,8 @@
+import pytest
 from harness import connect
 from pydantic import AnyUrl
+
+pytestmark = pytest.mark.anyio
 
 
 async def test_lists_add_tool():

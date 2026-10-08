@@ -1,8 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
+const here = dirname(fileURLToPath(import.meta.url));
 import {
   LANGUAGES,
   outputPath,
@@ -74,7 +78,7 @@ test("typescript scaffold uses the project name in package.json", () => {
   scaffold({ name: "weather-server", lang: "typescript", targetDir: target });
   const pkg = JSON.parse(readFileSync(join(target, "package.json"), "utf8"));
   assert.equal(pkg.name, "weather-server");
-  assert.equal(pkg.bin["weather-server"], "dist/index.js");
+  assert.equal(pkg.bin["weather-server"], "dist/src/index.js");
 });
 
 test("python scaffold derives the package directory from the name", () => {
@@ -99,4 +103,13 @@ test("every template file is listed in the package", () => {
   for (const lang of LANGUAGES) {
     assert.ok(existsSync(join(templatesDir, lang, "README.md")), `${lang} README missing`);
   }
+});
+
+test("the bin runs when invoked through a symlink, as npm does", () => {
+  const dir = tempDir();
+  const link = join(dir, "create-mcp-scaffold");
+  symlinkSync(join(here, "..", "bin", "create-mcp-scaffold.mjs"), link);
+  const result = spawnSync(process.execPath, [link, "linked-app"], { cwd: dir, encoding: "utf8" });
+  assert.equal(result.status, 0, result.stderr);
+  assert.ok(existsSync(join(dir, "linked-app", "package.json")));
 });

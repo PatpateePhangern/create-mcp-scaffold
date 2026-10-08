@@ -1,4 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, it } from "node:test";
+import assert from "node:assert/strict";
 import { connect } from "./harness.js";
 
 type Connection = Awaited<ReturnType<typeof connect>>;
@@ -16,22 +17,24 @@ describe("{{name}} server", () => {
 
   it("lists the add tool", async () => {
     const { tools } = await conn.client.listTools();
-    expect(tools.map((t) => t.name)).toContain("add");
+    assert.ok(tools.some((t) => t.name === "add"));
   });
 
   it("adds two numbers", async () => {
     const result = await conn.client.callTool({ name: "add", arguments: { a: 2, b: 3 } });
-    expect(result.content).toEqual([{ type: "text", text: "5" }]);
+    assert.deepEqual(result.content, [{ type: "text", text: "5" }]);
   });
 
   it("rejects arguments that do not match the schema", async () => {
     const result = await conn.client.callTool({ name: "add", arguments: { a: "x", b: 1 } });
-    expect(result.isError).toBe(true);
+    assert.equal(result.isError, true);
   });
 
   it("serves the greeting resource", async () => {
     const result = await conn.client.readResource({ uri: "greeting://hello" });
-    expect(result.contents[0]).toMatchObject({ text: "hello" });
+    const [first] = result.contents as Array<{ uri: string; text?: string }>;
+    assert.equal(first.uri, "greeting://hello");
+    assert.equal(first.text, "hello");
   });
 
   it("renders the summarize prompt", async () => {
@@ -39,6 +42,6 @@ describe("{{name}} server", () => {
       name: "summarize",
       arguments: { topic: "tides" },
     });
-    expect(result.messages[0].content).toEqual({ type: "text", text: "Summarize tides." });
+    assert.deepEqual(result.messages[0].content, { type: "text", text: "Summarize tides." });
   });
 });

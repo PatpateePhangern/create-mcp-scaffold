@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
@@ -116,7 +116,8 @@ function main(argv) {
   return 0;
 }
 
-const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+// npm runs the bin through a symlink, so compare real paths or main() never runs.
+const isMain = process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   try {
     process.exitCode = main(process.argv.slice(2));
