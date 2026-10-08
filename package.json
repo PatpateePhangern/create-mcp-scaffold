@@ -1,0 +1,32 @@
+{
+  "name": "create-mcp-scaffold",
+  "version": "0.1.0",
+  "description": "Generate a runnable MCP server in TypeScript or Python, with tests and CI",
+  "type": "module",
+  "bin": {
+    "create-mcp-scaffold": "bin/create-mcp-scaffold.mjs"
+  },
+  "files": [
+    "bin",
+    "templates"
+  ],
+  "scripts": {
+    "test": "node --test test/generator.test.mjs",
+    "test:e2e": "node --test test/e2e.test.mjs"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "scaffold",
+    "generator",
+    "template"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PatpateePhangern/create-mcp-scaffold.git"
+  }
+}
